@@ -9,22 +9,22 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
-public class Window {
+public class WindowHandler {
     int width, height;
     String title;
     private long appWindow;
-    private static Window window = null;
-    private Window() {
+    private static WindowHandler windowHandler = null;
+    private WindowHandler() {
         this.width = 1360;
         this.height = 768;
         this.title = "GRIME";
     }
-    public  static Window get() {
-    if (Window.window == null) {
-        Window.window = new Window();
+    public  static WindowHandler get() {
+    if (WindowHandler.windowHandler == null) {
+        WindowHandler.windowHandler = new WindowHandler();
         }
 
-    return Window.window;
+    return WindowHandler.windowHandler;
     }
 
     public void run() {
@@ -62,6 +62,13 @@ public class Window {
             throw new IllegalStateException("Failed to create App Window");
         }
 
+        //Adding input listeners to window
+        glfwSetCursorPosCallback(appWindow, MouseListener::mousePosCallback);
+        glfwSetMouseButtonCallback(appWindow, MouseListener::mouseBtnCallback);
+        glfwSetScrollCallback(appWindow, MouseListener::mouseScrollCallback);
+        glfwSetKeyCallback(appWindow, KeyListener::keyCallback);
+
+
         //Make the OpenGl the context current
             glfwMakeContextCurrent(appWindow);
         //Enable vsync
@@ -85,6 +92,13 @@ public class Window {
 
             glClearColor(0.25f,0.0f,0.25f,1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
+
+           if (KeyListener.isKeyDown(GLFW_KEY_SPACE)) {
+               System.out.println("space key is pressed");
+           }
+           if (MouseListener.mouseButtonIsDown(GLFW_MOUSE_BUTTON_1)){
+               System.out.println("m1 is pressed");
+           }
 
             glfwSwapBuffers(appWindow);
         }
