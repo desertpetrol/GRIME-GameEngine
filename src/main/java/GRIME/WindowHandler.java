@@ -1,5 +1,7 @@
 package GRIME;
 
+import Util.Time;
+
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
@@ -14,11 +16,28 @@ public class WindowHandler {
     String title;
     private long appWindow;
     private static WindowHandler windowHandler = null;
+    private static Scene currentScene;
+
     private WindowHandler() {
         this.width = 1360;
         this.height = 768;
         this.title = "GRIME";
     }
+
+    public static void changeScene (int newScene) {
+        switch (newScene) {
+            case 0:
+                currentScene = new LevelEditorScene();
+                //currentScene.init();
+                break;
+            case 1:
+                currentScene = new LevelScene();
+                break;
+            default:
+                assert false : "Unknown scene " + newScene;
+        }
+    }
+
     public  static WindowHandler get() {
     if (WindowHandler.windowHandler == null) {
         WindowHandler.windowHandler = new WindowHandler();
@@ -70,7 +89,7 @@ public class WindowHandler {
 
 
         //Make the OpenGl the context current
-            glfwMakeContextCurrent(appWindow);
+        glfwMakeContextCurrent(appWindow);
         //Enable vsync
         glfwSwapInterval(1);
 
@@ -82,16 +101,25 @@ public class WindowHandler {
         // creates the GLCapabilities instance and makes the OpenGL
         // bindings available for use.
         GL.createCapabilities();
+
+        WindowHandler.changeScene(0);
     }
 
 
     public void loop() {
+        float beginTime = Time.getTime();
+        float endTime;
+        float dt = -1.0f;
+
+
         while (!glfwWindowShouldClose(appWindow)) {
+
             //Poll events
             glfwPollEvents();
 
             glClearColor(0.25f,0.0f,0.25f,1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
+
 
            if (KeyListener.isKeyDown(GLFW_KEY_SPACE)) {
                System.out.println("space key is pressed");
@@ -99,10 +127,16 @@ public class WindowHandler {
            if (MouseListener.mouseButtonIsDown(GLFW_MOUSE_BUTTON_1)){
                System.out.println("m1 is pressed");
            }
+            if (dt >= 0) {
+                currentScene.update(dt);
+            }
 
             glfwSwapBuffers(appWindow);
+
+            endTime = Time.getTime();
+            dt = endTime - beginTime;
+            beginTime = endTime;
+
         }
-
     }
-
 }
